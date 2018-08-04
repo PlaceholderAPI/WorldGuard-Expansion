@@ -41,6 +41,11 @@
       <artifactId>worldguard-legacy</artifactId>
       <version>LATEST</version>
     </dependency>
+    <dependency>
+      <groupId>com.sk89q.worldedit</groupId>
+      <artifactId>worldedit-core</artifactId>
+      <version>LATEST</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -50,7 +55,7 @@
         <artifactId>maven-jar-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <finalName>${name}</finalName>
+          <finalName>${project.name}-${project.version}</finalName>
           <archive>
             <manifest>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
