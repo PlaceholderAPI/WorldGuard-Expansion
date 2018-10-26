@@ -20,15 +20,18 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.util.Set;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+
+import java.util.Set;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -36,11 +39,12 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
   private final String IDENTIFIER = NAME.toLowerCase();
   private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-  private WorldGuardPlugin worldguard;
+  private WorldGuard worldguard;
 
   @Override
   public boolean canRegister() {
-    worldguard = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin(NAME);
+    if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
+    worldguard = WorldGuard.getInstance();
     return worldguard != null;
   }
 
@@ -86,7 +90,11 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
   private ProtectedRegion getRegion(Location loc) {
     if (loc == null) return null;
-    ApplicableRegionSet ars = worldguard.getRegionManager(loc.getWorld()).getApplicableRegions(loc);
+    RegionManager manager = worldguard.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(loc.getWorld()));
+    
+    if (manager == null) return null;
+    ApplicableRegionSet ars = manager.getApplicableRegions(BukkitAdapter.adapt(loc).toVector());
+    
     return ars.getRegions().stream().findFirst().orElse(null);
   }
 
