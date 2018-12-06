@@ -22,7 +22,6 @@ package com.extendedclip.papi.expansion.worldguard;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -90,12 +89,22 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
   private ProtectedRegion getRegion(Location loc) {
     if (loc == null) return null;
+
     RegionManager manager = worldguard.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(loc.getWorld()));
-    
+
     if (manager == null) return null;
-    ApplicableRegionSet ars = manager.getApplicableRegions(BukkitAdapter.adapt(loc).toVector());
-    
-    return ars.getRegions().stream().findFirst().orElse(null);
+
+    try {
+
+      ProtectedRegion region = manager.getRegion(manager.getApplicableRegionsIDs(BukkitAdapter.adapt(loc).toVector().toBlockPoint()).get(0));
+
+      return region;
+
+    } catch (IndexOutOfBoundsException e) {
+
+      return null;
+
+    }
   }
 
   // world,x,y,z
