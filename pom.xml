@@ -5,7 +5,7 @@
   <groupId>com.extendedclip.papi.expansion.worldguard</groupId>
   <artifactId>worldguard-expansion</artifactId>
   <version>1.4.0-SNAPSHOT</version>
-  <name>Expansion-WorldGuard</name>
+  <name>WorldGuard-Expansion</name>
   <description>PlaceholderAPI expansion for WorldGuard placeholders</description>
 
   <repositories>
