@@ -131,7 +131,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
   @Override
   public String getAuthor() {
-    return "clip / akaregi";
+    return "clip";
   }
 
   @Override
