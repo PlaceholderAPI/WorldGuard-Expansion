@@ -32,6 +32,7 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
@@ -77,12 +78,12 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         Set<String> o = r.getOwners().getGroups();
         return o == null ? "" : String.join(", ", o);
       case "region_owner_groups":
-        return r.getOwners().getGroups().toString();
+        return this.toGroupsString(r.getOwners().getGroups());
       case "region_members":
         Set<String> m = r.getMembers().getGroups();
         return m == null ? "" : String.join(", ", m);
       case "region_members_groups":
-        return r.getMembers().getGroups().toString();
+        return this.toGroupsString(r.getMembers().getGroups());
       case "region_flags":
         return r.getFlags().entrySet().toString();
     }
@@ -142,5 +143,20 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
   @Override
   public String getIdentifier() {
     return IDENTIFIER;
+  }
+
+  private String toGroupsString(Set<String> groups) {
+    StringBuilder str = new StringBuilder();
+    Iterator it = groups.iterator();
+
+    while(it.hasNext()) {
+      str.append("*");
+      str.append((String)it.next());
+      if (it.hasNext()) {
+        str.append(", ");
+      }
+    }
+
+    return str.toString();
   }
 }
