@@ -32,9 +32,7 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -75,12 +73,12 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
       case "region_name":
         return r.getId();
       case "region_owner":
-        Set<String> o = r.getOwners().getGroups();
+        Set<String> o = this.convertUUIDtoString(r.getOwners().getPlayers());
         return o == null ? "" : String.join(", ", o);
       case "region_owner_groups":
         return this.toGroupsString(r.getOwners().getGroups());
       case "region_members":
-        Set<String> m = r.getMembers().getGroups();
+        Set<String> m = this.convertUUIDtoString(r.getMembers().getPlayers());
         return m == null ? "" : String.join(", ", m);
       case "region_members_groups":
         return this.toGroupsString(r.getMembers().getGroups());
@@ -158,5 +156,13 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     return str.toString();
+  }
+
+  private Set<String> convertUUIDtoString(Set<UUID> from){
+    Set<String> to = new HashSet<>();
+    for(UUID uuid : from){
+      to.add(Bukkit.getOfflinePlayer(uuid).getName());
+    }
+    return to;
   }
 }
