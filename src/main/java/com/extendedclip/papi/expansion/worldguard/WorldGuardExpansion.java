@@ -29,8 +29,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.codemc.worldguardwrapper.WorldGuardWrapper;
+import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
-import java.util.Set;
+import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -38,19 +40,19 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
   private final String IDENTIFIER = NAME.toLowerCase();
   private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-  private WorldGuard worldguard;
+  private WorldGuardWrapper worldguard;
 
   @Override
   public boolean canRegister() {
     if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
-    worldguard = WorldGuard.getInstance();
+    worldguard = WorldGuardWrapper.getInstance();
     return worldguard != null;
   }
 
   @Override
   public String onRequest(OfflinePlayer offlinePlayer, String params) {
 
-    ProtectedRegion r;
+    IWrappedRegion r;
 
     if (params.contains(":")) {
       String[] args = params.split(":");
@@ -71,15 +73,17 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
       case "region_name":
         return r.getId();
       case "region_owner":
-        Set<String> o = r.getOwners().getPlayerDomain().getPlayers();
-        return o == null ? "" : String.join(", ", o);
+        Set<String> o = new HashSet<>();
+        r.getOwners().getPlayers().forEach(u -> o.add(Bukkit.getOfflinePlayer(u).getName()));
+        return o.isEmpty() ? "" : String.join(", ", o);
       case "region_owner_groups":
-        return r.getOwners().toGroupsString();
+        return this.toGroupsString(r.getOwners().getGroups());
       case "region_members":
-        Set<String> m = r.getMembers().getPlayers();
-        return m == null ? "" : String.join(", ", m);
+        Set<String> m = new HashSet<>();
+        r.getMembers().getPlayers().forEach(u -> m.add(Bukkit.getOfflinePlayer(u).getName()));
+        return m.isEmpty() ? "" : String.join(", ", m);
       case "region_members_groups":
-        return r.getMembers().toGroupsString();
+        return this.toGroupsString(r.getMembers().getGroups());
       case "region_flags":
         return r.getFlags().entrySet().toString();
     }
@@ -87,18 +91,15 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     return null;
   }
 
-  private ProtectedRegion getRegion(Location loc) {
+  private IWrappedRegion getRegion(Location loc) {
     if (loc == null) return null;
-
-    RegionManager manager = worldguard.getPlatform().getRegionContainer().get(BukkitAdapter.adapt(loc.getWorld()));
-
-    if (manager == null) return null;
 
     try {
 
-      ProtectedRegion region = manager.getRegion(manager.getApplicableRegionsIDs(BukkitAdapter.adapt(loc).toVector().toBlockPoint()).get(0));
+      Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
 
-      return region;
+
+      return region.isPresent() ? region.get() : null;
 
     } catch (IndexOutOfBoundsException e) {
 
@@ -142,5 +143,20 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
   @Override
   public String getIdentifier() {
     return IDENTIFIER;
+  }
+
+  private String toGroupsString(Set<String> groups) {
+    StringBuilder str = new StringBuilder();
+    Iterator it = groups.iterator();
+
+    while(it.hasNext()) {
+      str.append("*");
+      str.append((String)it.next());
+      if (it.hasNext()) {
+        str.append(", ");
+      }
+    }
+
+    return str.toString();
   }
 }
