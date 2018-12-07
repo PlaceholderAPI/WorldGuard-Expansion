@@ -73,13 +73,15 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
       case "region_name":
         return r.getId();
       case "region_owner":
-        Set<String> o = this.convertUUIDtoString(r.getOwners().getPlayers());
-        return o == null ? "" : String.join(", ", o);
+        Set<String> o = new HashSet<>();
+        r.getOwners().getPlayers().forEach(u -> o.add(Bukkit.getOfflinePlayer(u).getName()));
+        return o.isEmpty() ? "" : String.join(", ", o);
       case "region_owner_groups":
         return this.toGroupsString(r.getOwners().getGroups());
       case "region_members":
-        Set<String> m = this.convertUUIDtoString(r.getMembers().getPlayers());
-        return m == null ? "" : String.join(", ", m);
+        Set<String> m = new HashSet<>();
+        r.getMembers().getPlayers().forEach(u -> m.add(Bukkit.getOfflinePlayer(u).getName()));
+        return m.isEmpty() ? "" : String.join(", ", m);
       case "region_members_groups":
         return this.toGroupsString(r.getMembers().getGroups());
       case "region_flags":
@@ -156,13 +158,5 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     return str.toString();
-  }
-
-  private Set<String> convertUUIDtoString(Set<UUID> from){
-    Set<String> to = new HashSet<>();
-    for(UUID uuid : from){
-      to.add(Bukkit.getOfflinePlayer(uuid).getName());
-    }
-    return to;
   }
 }
