@@ -31,132 +31,147 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
+import org.codemc.worldguardwrapper.selection.ICuboidSelection;
+import org.codemc.worldguardwrapper.selection.IPolygonalSelection;
+import org.codemc.worldguardwrapper.selection.ISelection;
 
 import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
-  private final String NAME = "WorldGuard";
-  private final String IDENTIFIER = NAME.toLowerCase();
-  private final String VERSION = getClass().getPackage().getImplementationVersion();
+    private final String NAME = "WorldGuard";
+    private final String IDENTIFIER = NAME.toLowerCase();
+    private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-  private WorldGuardWrapper worldguard;
+    private WorldGuardWrapper worldguard;
 
-  @Override
-  public boolean canRegister() {
-    if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
-    worldguard = WorldGuardWrapper.getInstance();
-    return worldguard != null;
-  }
-
-  @Override
-  public String onRequest(OfflinePlayer offlinePlayer, String params) {
-
-    IWrappedRegion r;
-
-    if (params.contains(":")) {
-      String[] args = params.split(":");
-      params = args[0];
-      r = getRegion(deserializeLoc(args[1]));
-    } else {
-      if (offlinePlayer == null || !offlinePlayer.isOnline()) {
-        return "";
-      }
-      r = getRegion(((Player) offlinePlayer).getLocation());
+    @Override
+    public boolean canRegister() {
+        if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null)
+            return false;
+        worldguard = WorldGuardWrapper.getInstance();
+        return worldguard != null;
     }
 
-    if (r == null) {
-      return "";
+    @Override
+    public String onRequest(OfflinePlayer offlinePlayer, String params) {
+        IWrappedRegion region;
+        if (params.contains(":")) {
+            String[] args = params.split(":");
+            params = args[0];
+            region = getRegion(deserializeLoc(args[1]));
+        } else {
+            if (offlinePlayer == null || !offlinePlayer.isOnline()) {
+                return "";
+            }
+            region = getRegion(((Player) offlinePlayer).getLocation());
+        }
+
+        if (region == null) {
+            return "";
+        }
+        return parseParam(params,region);
     }
 
-    switch (params) {
-      case "region_name":
-        return r.getId();
-      case "region_owner":
-        Set<String> o = new HashSet<>();
-        r.getOwners().getPlayers().forEach(u -> o.add(Bukkit.getOfflinePlayer(u).getName()));
-        return o.isEmpty() ? "" : String.join(", ", o);
-      case "region_owner_groups":
-        return this.toGroupsString(r.getOwners().getGroups());
-      case "region_members":
-        Set<String> m = new HashSet<>();
-        r.getMembers().getPlayers().forEach(u -> m.add(Bukkit.getOfflinePlayer(u).getName()));
-        return m.isEmpty() ? "" : String.join(", ", m);
-      case "region_members_groups":
-        return this.toGroupsString(r.getMembers().getGroups());
-      case "region_flags":
-        return r.getFlags().entrySet().toString();
+    private String parseParam(String params,IWrappedRegion region){
+        Location minLoc = ((ICuboidSelection)region).getMinimumPoint();
+        Location maxLoc = ((ICuboidSelection)region).getMaximumPoint();
+        switch (params) {
+            case "region_name":
+                return region.getId();
+            case "region_owner":
+                Set<String> owners = new HashSet<>();
+                region.getOwners().getPlayers().forEach(uuid -> owners.add(Bukkit.getOfflinePlayer(uuid).getName()));
+                return owners.isEmpty() ? "" : String.join(", ", owners);
+            case "region_owner_groups":
+                return this.toGroupsString(region.getOwners().getGroups());
+            case "region_members":
+                Set<String> members = new HashSet<>();
+                region.getMembers().getPlayers().forEach(uuid -> members.add(Bukkit.getOfflinePlayer(uuid).getName()));
+                return members.isEmpty() ? "" : String.join(", ", members);
+            case "region_members_groups":
+                return this.toGroupsString(region.getMembers().getGroups());
+            case "region_flags":
+                return region.getFlags().entrySet().toString();
+            case "region_min_point_x":
+                return String.valueOf(minLoc.getBlockX());
+            case "region_min_point_y":
+                return String.valueOf(minLoc.getBlockY());
+            case "region_min_point_z":
+                return String.valueOf(minLoc.getBlockZ());
+            case "region_max_point_x":
+                return String.valueOf(maxLoc.getBlockX());
+            case "region_max_point_y":
+                return String.valueOf(maxLoc.getBlockY());
+            case "region_max_point_z":
+                return String.valueOf(maxLoc.getBlockZ());
+        }
+        return null;
     }
 
-    return null;
-  }
+    private IWrappedRegion getRegion(Location loc) {
+        if (loc == null) return null;
 
-  private IWrappedRegion getRegion(Location loc) {
-    if (loc == null) return null;
+        try {
 
-    try {
-
-      Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
+            Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
 
 
-      return region.isPresent() ? region.get() : null;
+            return region.isPresent() ? region.get() : null;
 
-    } catch (IndexOutOfBoundsException e) {
-
-      return null;
-
-    }
-  }
-
-  // world,x,y,z
-  private Location deserializeLoc(String locString) {
-    if (!locString.contains(",")) {
-      return null;
-    }
-    String[] s = locString.split(",");
-    try {
-      return new Location(
-          Bukkit.getWorld(s[0]),
-          Double.parseDouble(s[1]),
-          Double.parseDouble(s[2]),
-          Double.parseDouble(s[3]));
-    } catch (Exception e) {
-    }
-    return null;
-  }
-
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public String getAuthor() {
-    return "clip";
-  }
-
-  @Override
-  public String getVersion() {
-    return VERSION;
-  }
-
-  @Override
-  public String getIdentifier() {
-    return IDENTIFIER;
-  }
-
-  private String toGroupsString(Set<String> groups) {
-    StringBuilder str = new StringBuilder();
-    Iterator it = groups.iterator();
-
-    while(it.hasNext()) {
-      str.append("*");
-      str.append((String)it.next());
-      if (it.hasNext()) {
-        str.append(", ");
-      }
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
-    return str.toString();
-  }
+
+    private Location deserializeLoc(String locString) {
+        if (!locString.contains(",")) {
+            return null;
+        }
+        String[] locations = locString.split(",");
+        try {
+            return new Location(
+                    Bukkit.getWorld(locations[0]),
+                    Double.parseDouble(locations[1]),
+                    Double.parseDouble(locations[2]),
+                    Double.parseDouble(locations[3])
+            );
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
+    @Override
+    public String getAuthor() {
+        return "clip";
+    }
+
+    @Override
+    public String getVersion() {
+        return VERSION;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return IDENTIFIER;
+    }
+
+    private String toGroupsString(Set<String> groups) {
+        StringBuilder groupsString = new StringBuilder();
+        Iterator it = groups.iterator();
+        while(it.hasNext()) {
+            groupsString.append("*");
+            groupsString.append((String)it.next());
+            if (it.hasNext()) {
+                groupsString.append(", ");
+            }
+        }
+        return groupsString.toString();
+    }
 }
