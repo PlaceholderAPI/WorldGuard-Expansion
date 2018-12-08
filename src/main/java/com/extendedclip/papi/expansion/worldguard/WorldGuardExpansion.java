@@ -40,6 +40,7 @@ import java.util.*;
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
     private final String NAME = "WorldGuard";
+    private final String AUTHOR = "clip";
     private final String IDENTIFIER = NAME.toLowerCase();
     private final String VERSION = getClass().getPackage().getImplementationVersion();
 
@@ -149,7 +150,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
     @Override
     public String getAuthor() {
-        return "clip";
+        return AUTHOR;
     }
 
     @Override
