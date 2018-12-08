@@ -74,8 +74,8 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     private String parseParam(String params,IWrappedRegion region){
-        Location minLoc = ((ICuboidSelection)region).getMinimumPoint();
-        Location maxLoc = ((ICuboidSelection)region).getMaximumPoint();
+        Location minLoc = ((ICuboidSelection)region.getSelection()).getMinimumPoint();
+        Location maxLoc = ((ICuboidSelection)region.getSelection()).getMaximumPoint();
         switch (params) {
             case "region_name":
                 return region.getId();
