@@ -20,10 +20,7 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -32,23 +29,24 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import org.codemc.worldguardwrapper.selection.ICuboidSelection;
-import org.codemc.worldguardwrapper.selection.IPolygonalSelection;
-import org.codemc.worldguardwrapper.selection.ISelection;
 
 import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
-
-    private final String NAME = "WorldGuard";
-    private final String AUTHOR = "clip";
-    private final String IDENTIFIER = NAME.toLowerCase();
-    private final String VERSION = getClass().getPackage().getImplementationVersion();
+    @Getter(onMethod=@__({@Override}))
+    private final String name = "WorldGuard";
+    @Getter(onMethod=@__({@Override}))
+    private final String author = "clip";
+    @Getter(onMethod=@__({@Override}))
+    private final String identifier = name.toLowerCase();
+    @Getter(onMethod=@__({@Override}))
+    private final String version = getClass().getPackage().getImplementationVersion();
 
     private WorldGuardWrapper worldguard;
 
     @Override
     public boolean canRegister() {
-        if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null)
+        if (Bukkit.getServer().getPluginManager().getPlugin(name) == null)
             return false;
         worldguard = WorldGuardWrapper.getInstance();
         return worldguard != null;
@@ -117,7 +115,6 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
             Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
 
-
             return region.isPresent() ? region.get() : null;
 
         } catch (IndexOutOfBoundsException e) {
@@ -141,26 +138,6 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         } catch (Exception e) {
         }
         return null;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public String getAuthor() {
-        return AUTHOR;
-    }
-
-    @Override
-    public String getVersion() {
-        return VERSION;
-    }
-
-    @Override
-    public String getIdentifier() {
-        return IDENTIFIER;
     }
 
     private String toGroupsString(Set<String> groups) {
