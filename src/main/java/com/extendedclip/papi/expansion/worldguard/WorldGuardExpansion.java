@@ -20,8 +20,6 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
@@ -33,6 +31,7 @@ import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import org.codemc.worldguardwrapper.selection.ICuboidSelection;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
     @Getter(onMethod=@__({@Override}))
@@ -124,12 +123,13 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         if (loc == null) return null;
 
         try {
-
-            Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
-
-            return region.isPresent() ? region.get() : null;
-
-        } catch (IndexOutOfBoundsException e) {
+            List<String> regionIDs = new ArrayList<>();
+            for(IWrappedRegion region : worldguard.getRegions(loc)){
+                regionIDs.add(region.getId());
+            }
+            Collections.sort(regionIDs);
+            return worldguard.getRegion(loc.getWorld(),regionIDs.get(0)).get();
+        } catch (ArrayIndexOutOfBoundsException | NoSuchElementException e) {
             return null;
         }
     }
