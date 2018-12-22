@@ -20,6 +20,8 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
@@ -75,7 +77,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     private String parseParam(String params,IWrappedRegion region){
         Location minLoc = null;
         Location maxLoc = null;
-        if(region instanceof ICuboidSelection){
+        if(region.getSelection() instanceof ICuboidSelection){
             minLoc = ((ICuboidSelection)region.getSelection()).getMinimumPoint();
             maxLoc = ((ICuboidSelection)region.getSelection()).getMaximumPoint();
         }

@@ -111,6 +111,14 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <relocations>
+            <relocation>
+              <pattern>org.codemc.worldguardwrapper</pattern>
+              <shadedPattern>com.extendedclip.papi.expansion.worldguard.libs.worldguardwrapper</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
       </plugin>
     </plugins>
   </build>
