@@ -73,8 +73,12 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     private String parseParam(String params,IWrappedRegion region){
-        Location minLoc = ((ICuboidSelection)region.getSelection()).getMinimumPoint();
-        Location maxLoc = ((ICuboidSelection)region.getSelection()).getMaximumPoint();
+        Location minLoc = null;
+        Location maxLoc = null;
+        if(region instanceof ICuboidSelection){
+            minLoc = ((ICuboidSelection)region.getSelection()).getMinimumPoint();
+            maxLoc = ((ICuboidSelection)region.getSelection()).getMaximumPoint();
+        }
         switch (params) {
             case "region_name":
                 return region.getId();
@@ -93,16 +97,22 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             case "region_flags":
                 return region.getFlags().entrySet().toString();
             case "region_min_point_x":
+                if(minLoc != null)
                 return String.valueOf(minLoc.getBlockX());
             case "region_min_point_y":
+                if(minLoc != null)
                 return String.valueOf(minLoc.getBlockY());
             case "region_min_point_z":
+                if(minLoc != null)
                 return String.valueOf(minLoc.getBlockZ());
             case "region_max_point_x":
+                if(maxLoc != null)
                 return String.valueOf(maxLoc.getBlockX());
             case "region_max_point_y":
+                if(maxLoc != null)
                 return String.valueOf(maxLoc.getBlockY());
             case "region_max_point_z":
+                if(maxLoc != null)
                 return String.valueOf(maxLoc.getBlockZ());
         }
         return null;
