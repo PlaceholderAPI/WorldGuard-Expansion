@@ -127,7 +127,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             worldguard.getRegions(loc).forEach(region -> regionIDs.add(region.getId()));
             Collections.sort(regionIDs);
             return worldguard.getRegion(loc.getWorld(),regionIDs.get(0)).get();
-        } catch (ArrayIndexOutOfBoundsException | NoSuchElementException e) {
+        } catch (IndexOutOfBoundsException | NoSuchElementException e) {
             return null;
         }
     }
