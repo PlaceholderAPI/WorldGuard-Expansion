@@ -40,10 +40,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     private WorldGuardWrapper worldguard;
 
     /**
-     * Since this expansion requires api access to the plugin "SomePlugin"
-     * we must check if said plugin is on the server or not.
+     * This expansion requires WorldGuard to work, so we have to check for it here.
      *
-     * @return true or false depending on if the required plugin is installed.
+     * @return true if WorldGuard is installed and active.
      */
     @Override
     public boolean canRegister() {
@@ -58,7 +57,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * The name of the person who created this expansion should go here.
+     * The name of the person who created this expansion.
      *
      * @return The name of the author as a String.
      */
@@ -68,8 +67,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * This is the version of this expansion.
-     * <br>You don't have to use numbers, since it is set as a String.
+     * The Version of this expansion.
      *
      * @return The version as a String.
      */
@@ -79,13 +77,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * The placeholder identifier should go here.
-     * <br>This is what tells PlaceholderAPI to call our onRequest
-     * method to obtain a value if a placeholder starts with our
-     * identifier.
-     * <br>This must be unique and can not contain % or _
+     * The identifier "worldguard".
      *
-     * @return The identifier in {@code %<identifier>_<value>%} as String.
+     * @return "worldguard".
      */
     @Override
     public String getIdentifier() {
@@ -118,9 +112,11 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * Get a wrapped region from a location
-     * @param location the location to check
-     * @return the wrapped region
+     * Get a wrapped region from a location.
+     *
+     * @param location The location to check
+     *
+     * @return The wrapped region
      */
     private IWrappedRegion getRegion(Location location) {
         if (location == null) {
