@@ -21,10 +21,12 @@
 package com.extendedclip.papi.expansion.worldguard;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
@@ -106,7 +108,11 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         // Defined as a switch statement to keep thinks clean
         switch (params) {
             // Check the name of the region the player is in
-            case "region_name": return region.getId();
+            case "region_name":
+                return region.getId();
+                // Because some people are stubborn, let's have it also provide capitalization
+            case "region_name_capitalized":
+                return Character.isLetter(region.getId().charAt(0)) ? StringUtils.capitalize(region.getId()) : region.getId();
         }
 
         return null;
