@@ -20,10 +20,6 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -32,131 +28,104 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
-import java.util.*;
+import java.util.Optional;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
-  private final String NAME = "WorldGuard";
-  private final String IDENTIFIER = NAME.toLowerCase();
-  private final String VERSION = getClass().getPackage().getImplementationVersion();
+    private final String NAME = "WorldGuard";
+    private final String IDENTIFIER = NAME.toLowerCase();
+    private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-  private WorldGuardWrapper worldguard;
+    private WorldGuardWrapper worldguard;
 
-  @Override
-  public boolean canRegister() {
-    if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
-    worldguard = WorldGuardWrapper.getInstance();
-    return worldguard != null;
-  }
-
-  @Override
-  public String onRequest(OfflinePlayer offlinePlayer, String params) {
-
-    IWrappedRegion r;
-
-    if (params.contains(":")) {
-      String[] args = params.split(":");
-      params = args[0];
-      r = getRegion(deserializeLoc(args[1]));
-    } else {
-      if (offlinePlayer == null || !offlinePlayer.isOnline()) {
-        return "";
-      }
-      r = getRegion(((Player) offlinePlayer).getLocation());
+    /**
+     * Since this expansion requires api access to the plugin "SomePlugin"
+     * we must check if said plugin is on the server or not.
+     *
+     * @return true or false depending on if the required plugin is installed.
+     */
+    @Override
+    public boolean canRegister() {
+        if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
+        worldguard = WorldGuardWrapper.getInstance();
+        return worldguard != null;
     }
 
-    if (r == null) {
-      return "";
+    @Override
+    public String getName() {
+        return NAME;
     }
 
-    switch (params) {
-      case "region_name":
-        return r.getId();
-      case "region_owner":
-        Set<String> o = new HashSet<>();
-        r.getOwners().getPlayers().forEach(u -> o.add(Bukkit.getOfflinePlayer(u).getName()));
-        return o.isEmpty() ? "" : String.join(", ", o);
-      case "region_owner_groups":
-        return this.toGroupsString(r.getOwners().getGroups());
-      case "region_members":
-        Set<String> m = new HashSet<>();
-        r.getMembers().getPlayers().forEach(u -> m.add(Bukkit.getOfflinePlayer(u).getName()));
-        return m.isEmpty() ? "" : String.join(", ", m);
-      case "region_members_groups":
-        return this.toGroupsString(r.getMembers().getGroups());
-      case "region_flags":
-        return r.getFlags().entrySet().toString();
+    /**
+     * The name of the person who created this expansion should go here.
+     *
+     * @return The name of the author as a String.
+     */
+    @Override
+    public String getAuthor() {
+        return "clip";
     }
 
-    return null;
-  }
-
-  private IWrappedRegion getRegion(Location loc) {
-    if (loc == null) return null;
-
-    try {
-
-      Optional<IWrappedRegion> region = worldguard.getRegion(loc.getWorld(),((IWrappedRegion)worldguard.getRegions(loc).toArray()[0]).getId());
-
-
-      return region.isPresent() ? region.get() : null;
-
-    } catch (IndexOutOfBoundsException e) {
-
-      return null;
-
-    }
-  }
-
-  // world,x,y,z
-  private Location deserializeLoc(String locString) {
-    if (!locString.contains(",")) {
-      return null;
-    }
-    String[] s = locString.split(",");
-    try {
-      return new Location(
-          Bukkit.getWorld(s[0]),
-          Double.parseDouble(s[1]),
-          Double.parseDouble(s[2]),
-          Double.parseDouble(s[3]));
-    } catch (Exception e) {
-    }
-    return null;
-  }
-
-  @Override
-  public String getName() {
-    return NAME;
-  }
-
-  @Override
-  public String getAuthor() {
-    return "clip";
-  }
-
-  @Override
-  public String getVersion() {
-    return VERSION;
-  }
-
-  @Override
-  public String getIdentifier() {
-    return IDENTIFIER;
-  }
-
-  private String toGroupsString(Set<String> groups) {
-    StringBuilder str = new StringBuilder();
-    Iterator it = groups.iterator();
-
-    while(it.hasNext()) {
-      str.append("*");
-      str.append((String)it.next());
-      if (it.hasNext()) {
-        str.append(", ");
-      }
+    /**
+     * This is the version of this expansion.
+     * <br>You don't have to use numbers, since it is set as a String.
+     *
+     * @return The version as a String.
+     */
+    @Override
+    public String getVersion() {
+        return VERSION;
     }
 
-    return str.toString();
-  }
+    /**
+     * The placeholder identifier should go here.
+     * <br>This is what tells PlaceholderAPI to call our onRequest
+     * method to obtain a value if a placeholder starts with our
+     * identifier.
+     * <br>This must be unique and can not contain % or _
+     *
+     * @return The identifier in {@code %<identifier>_<value>%} as String.
+     */
+    @Override
+    public String getIdentifier() {
+        return IDENTIFIER;
+    }
+
+
+    @Override
+    public String onRequest(OfflinePlayer offlinePlayer, String params) {
+
+        // Get the wrapper from input location
+        IWrappedRegion region = getRegion(((Player) offlinePlayer).getLocation());
+
+        // Make sure it's not null
+        if (region == null) {
+            return "";
+        }
+
+        // Defined as a switch statement to keep thinks clean
+        switch (params) {
+            // Check the name of the region the player is in
+            case "region_name": return region.getId();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get a wrapped region from a location
+     * @param location the location to check
+     * @return the wrapped region
+     */
+    private IWrappedRegion getRegion(Location location) {
+        if (location == null) {
+            return null;
+        }
+        try {
+            Optional<IWrappedRegion> region = worldguard.getRegion(location.getWorld(), ((IWrappedRegion) worldguard.getRegions(location).toArray()[0]).getId());
+            return region.orElse(null);
+        } catch (IndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
 }
