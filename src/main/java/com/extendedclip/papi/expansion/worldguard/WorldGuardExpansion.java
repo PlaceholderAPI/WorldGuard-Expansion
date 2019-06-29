@@ -29,7 +29,10 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -97,7 +100,25 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer offlinePlayer, String params) {
 
         // Get the wrapper from input location
-        IWrappedRegion region = getRegion(((Player) offlinePlayer).getLocation());
+        IWrappedRegion region;
+
+        // Check if it contains this symbol
+        if (params.contains(":")) {
+            // Split by symbol
+            String[] args = params.split(":");
+            // Set placeholder to first args
+            params = args[0];
+            // Set region to second args
+            region = getRegion(stringToLocation(args[1]));
+        } else {
+            // Check to make sure offline player is online
+            if (offlinePlayer == null || !offlinePlayer.isOnline()) {
+                // If not, return empty
+                return "";
+            }
+            // Return the region
+            region = getRegion(((Player) offlinePlayer).getLocation());
+        }
 
         // Make sure it's not null
         if (region == null) {
@@ -109,9 +130,33 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             // Check the name of the region the player is in
             case "region_name":
                 return region.getId();
-                // Because some people are stubborn, let's have it also provide capitalization
+            // Because some people are stubborn, let's have it also provide capitalization
             case "region_name_capitalized":
                 return Character.isLetter(region.getId().charAt(0)) ? StringUtils.capitalize(region.getId()) : region.getId();
+            case "region_owner": {
+                // Create a set of owners
+                Set<String> owners = new HashSet<>();
+                // Add them to set
+                region.getOwners().getPlayers().forEach(u -> owners.add(Bukkit.getOfflinePlayer(u).getName()));
+                // Return list of them
+                return owners.isEmpty() ? "" : String.join(", ", owners);
+            }
+            case "region_owner_groups":
+                // Turn the owner groups to a string
+                return toGroupString(region.getOwners().getGroups());
+            case "region_members":
+                // Create set for members
+                Set<String> members = new HashSet<>();
+                // Add all members to the region
+                region.getMembers().getPlayers().forEach(u -> members.add(Bukkit.getOfflinePlayer(u).getName()));
+                // Return list
+                return members.isEmpty() ? "" : String.join(", ", members);
+            case "region_members_groups":
+                // Turn member groups to a string
+                return toGroupString(region.getMembers().getGroups());
+            case "region_flags":
+                // Turn the list of flags to a string
+                return region.getFlags().entrySet().toString();
         }
 
         return null;
@@ -119,6 +164,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
     /**
      * Get a wrapped region from a location
+     *
      * @param location the location to check
      * @return the wrapped region
      */
@@ -132,5 +178,48 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         } catch (IndexOutOfBoundsException ex) {
             return null;
         }
+    }
+
+    /**
+     * Convert a string to a location
+     *
+     * @param loc the location to convert to
+     * @return location
+     */
+    private Location stringToLocation(String loc) {
+        if (!loc.contains(",")) {
+            return null;
+        }
+        String[] s = loc.split(",");
+        try {
+            return new Location(
+                    Bukkit.getWorld(s[0]),
+                    Double.parseDouble(s[1]),
+                    Double.parseDouble(s[2]),
+                    Double.parseDouble(s[3])
+            );
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Get a list of groups
+     *
+     * @param groups groups
+     * @return list
+     */
+    private String toGroupString(Set<String> groups) {
+        StringBuilder sb = new StringBuilder();
+        Iterator it = groups.iterator();
+
+        while (it.hasNext()) {
+            sb.append("*");
+            sb.append((String) it.next());
+            if (it.hasNext()) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 }
