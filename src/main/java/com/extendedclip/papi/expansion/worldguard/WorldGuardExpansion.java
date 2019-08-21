@@ -20,6 +20,7 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -120,6 +121,14 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         // Make sure it's not null
         if (region == null) {
             return "";
+        }
+
+        if (params.startsWith("region_has_flag_")) {
+            final String[] rg = params.split("region_has_flag_");
+            if (rg.length < 1) return null;
+
+            return region.getFlags().keySet().stream().anyMatch(f ->
+                    f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
         }
 
         // Defined as a switch statement to keep thinks clean
