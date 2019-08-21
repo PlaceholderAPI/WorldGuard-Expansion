@@ -29,6 +29,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
+import org.codemc.worldguardwrapper.selection.ICuboidSelection;
 
 import java.util.*;
 
@@ -131,6 +132,8 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                     f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
         }
 
+        ICuboidSelection selection = (ICuboidSelection) region.getSelection();
+
         // Defined as a switch statement to keep thinks clean
         switch (params) {
             // Check the name of the region the player is in
@@ -166,6 +169,18 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
                 // Turn the list of flags to a string
                 return flags.entrySet().toString();
+            case "region_min_point_x":
+                return String.valueOf(selection.getMinimumPoint().getBlockX());
+            case "region_min_point_y":
+                return String.valueOf(selection.getMinimumPoint().getBlockY());
+            case "region_min_point_z":
+                return String.valueOf(selection.getMinimumPoint().getBlockZ());
+            case "region_max_point_x":
+                return String.valueOf(selection.getMaximumPoint().getBlockX());
+            case "region_max_point_y":
+                return String.valueOf(selection.getMaximumPoint().getBlockY());
+            case "region_max_point_z":
+                return String.valueOf(selection.getMaximumPoint().getBlockZ());
         }
 
         return null;
