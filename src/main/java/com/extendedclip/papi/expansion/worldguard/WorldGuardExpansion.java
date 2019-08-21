@@ -29,10 +29,7 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -155,8 +152,11 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                 // Turn member groups to a string
                 return toGroupString(region.getMembers().getGroups());
             case "region_flags":
+                Map<String, Object> flags = new HashMap<>();
+                region.getFlags().forEach((key, value) -> flags.put(key.getName(), value));
+
                 // Turn the list of flags to a string
-                return region.getFlags().entrySet().toString();
+                return flags.entrySet().toString();
         }
 
         return null;
