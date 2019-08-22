@@ -20,6 +20,7 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -28,11 +29,9 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
+import org.codemc.worldguardwrapper.selection.ICuboidSelection;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class WorldGuardExpansion extends PlaceholderExpansion {
 
@@ -125,6 +124,16 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             return "";
         }
 
+        if (params.startsWith("region_has_flag_")) {
+            final String[] rg = params.split("region_has_flag_");
+            if (rg.length < 1) return null;
+
+            return region.getFlags().keySet().stream().anyMatch(f ->
+                    f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+        }
+
+        ICuboidSelection selection = (ICuboidSelection) region.getSelection();
+
         // Defined as a switch statement to keep thinks clean
         switch (params) {
             // Check the name of the region the player is in
@@ -155,8 +164,23 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                 // Turn member groups to a string
                 return toGroupString(region.getMembers().getGroups());
             case "region_flags":
+                Map<String, Object> flags = new HashMap<>();
+                region.getFlags().forEach((key, value) -> flags.put(key.getName(), value));
+
                 // Turn the list of flags to a string
-                return region.getFlags().entrySet().toString();
+                return flags.entrySet().toString();
+            case "region_min_point_x":
+                return String.valueOf(selection.getMinimumPoint().getBlockX());
+            case "region_min_point_y":
+                return String.valueOf(selection.getMinimumPoint().getBlockY());
+            case "region_min_point_z":
+                return String.valueOf(selection.getMinimumPoint().getBlockZ());
+            case "region_max_point_x":
+                return String.valueOf(selection.getMaximumPoint().getBlockX());
+            case "region_max_point_y":
+                return String.valueOf(selection.getMaximumPoint().getBlockY());
+            case "region_max_point_z":
+                return String.valueOf(selection.getMaximumPoint().getBlockZ());
         }
 
         return null;
