@@ -100,6 +100,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         // Get the wrapper from input location
         IWrappedRegion region;
+        ICuboidSelection selection;
 
         // Check if it contains this symbol
         if (params.contains(":")) {
@@ -131,8 +132,6 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             return region.getFlags().keySet().stream().anyMatch(f ->
                     f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
         }
-
-        ICuboidSelection selection = (ICuboidSelection) region.getSelection();
 
         // Defined as a switch statement to keep thinks clean
         switch (params) {
@@ -169,18 +168,29 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
                 // Turn the list of flags to a string
                 return flags.entrySet().toString();
-            case "region_min_point_x":
-                return String.valueOf(selection.getMinimumPoint().getBlockX());
-            case "region_min_point_y":
-                return String.valueOf(selection.getMinimumPoint().getBlockY());
-            case "region_min_point_z":
-                return String.valueOf(selection.getMinimumPoint().getBlockZ());
-            case "region_max_point_x":
-                return String.valueOf(selection.getMaximumPoint().getBlockX());
-            case "region_max_point_y":
-                return String.valueOf(selection.getMaximumPoint().getBlockY());
-            case "region_max_point_z":
-                return String.valueOf(selection.getMaximumPoint().getBlockZ());
+        }
+
+        if (params.startsWith("region_min_point_") || params.startsWith("region_max_point_")) {
+            try {
+                selection = (ICuboidSelection) region.getSelection();
+            } catch (ClassCastException e) {
+                return "";
+            }
+
+            switch (params) {
+                case "region_min_point_x":
+                    return String.valueOf(selection.getMinimumPoint().getBlockX());
+                case "region_min_point_y":
+                    return String.valueOf(selection.getMinimumPoint().getBlockY());
+                case "region_min_point_z":
+                    return String.valueOf(selection.getMinimumPoint().getBlockZ());
+                case "region_max_point_x":
+                    return String.valueOf(selection.getMaximumPoint().getBlockX());
+                case "region_max_point_y":
+                    return String.valueOf(selection.getMaximumPoint().getBlockY());
+                case "region_max_point_z":
+                    return String.valueOf(selection.getMaximumPoint().getBlockZ());
+            }
         }
 
         return null;
