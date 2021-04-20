@@ -107,7 +107,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         // Initialise region & create a default priority.
         ProtectedRegion region;
-        int priority = 0;
+        Integer priority = null;
 
         //Set priority to the one supplied by the placeholder string, if one exists.
         if (params.matches("(.*_)([1-9]\\d*)(.*)")) {
@@ -209,7 +209,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      * @param priority the priority wanted
      * @return the region
      */
-    private ProtectedRegion getRegion(Location location, int priority) {
+    private ProtectedRegion getRegion(Location location, Integer priority) {
         if (location == null) {
             return null;
         }
@@ -223,21 +223,24 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         Set<ProtectedRegion> regions = applicableRegionSet.getRegions();
 
         Set<ProtectedRegion> selectedRegions = new HashSet<>();
-
-        for(ProtectedRegion region : regions) {
-            if (region.getPriority() == priority) {
-                //Region is equal to chosen priority and we will select it.
-                selectedRegions.add(region);
+        if (priority != null) {
+            //We have been given a priority, now we want to select all regions with that priority.
+            for(ProtectedRegion region : regions) {
+                if (region.getPriority() == priority) {
+                    //Region is equal to chosen priority and we will select it.
+                    selectedRegions.add(region);
+                }
+            }
+            if (selectedRegions.size() == 1) {
+                //We have only selected one region in our prio search, that's the one we want.
+                return selectedRegions.stream().findFirst().get();
             }
         }
-        if (selectedRegions.isEmpty()) {
-            //Priority search came up empty, select all regions in the area.
-            selectedRegions.addAll(regions);
-        } else if (selectedRegions.size() == 1) {
-            //There was only one region in our priority search, that's the one we want so we'll return it :)
-            return selectedRegions.stream().findFirst().get();
-        }
 
+        //We have not been given a priority or the priority search came up w/ more or less than 1, select all regions.
+        selectedRegions.addAll(regions);
+
+        //We have selected more than one region, now we want to eliminate all children.
         ProtectedRegion removedRegion = null;
         for (ProtectedRegion region : selectedRegions) {
             if (region.getParent() != null) {
