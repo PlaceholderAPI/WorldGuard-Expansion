@@ -142,7 +142,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         if (params.startsWith("region_has_flag_")) {
             final String[] rg = params.split("region_has_flag_");
-            if (rg.length < 1) return null;
+            if (rg.length < 1) {
+                return null;
+            }
 
             return region.getFlags().keySet().stream().anyMatch(f ->
                     f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
