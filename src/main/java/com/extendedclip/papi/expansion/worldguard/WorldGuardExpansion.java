@@ -127,6 +127,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             location = stringToLocation(args[1]);
         } else {
             if (offlinePlayer == null || !offlinePlayer.isOnline()) {
+                //Ensure we can cast offlinePlayer to Player
                 return "";
             }
             location = ((Player) offlinePlayer).getLocation();
@@ -134,6 +135,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         region = getRegion(location, priority);
 
+        // If no region exists, return nothing
         if (region == null) {
             return "";
         }
@@ -146,6 +148,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                     f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
         }
 
+        // Defined as a switch statement to keep things clean
         switch (params) {
             // Check the name of the region the player is in
             case "region_name":
