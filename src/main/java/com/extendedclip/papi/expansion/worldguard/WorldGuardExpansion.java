@@ -117,17 +117,22 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             params = params.replace("_" + priority, "");
         }
 
-        // Check if it contains this symbol
+        //Create a default location.
+        Location location;
+
+        //Check if a placeholder contains a ":", and therefore query the location given in the placeholder.
         if (params.contains(":")) {
             String[] args = params.split(":");
             params = args[0];
-            region = getRegion(stringToLocation(args[1]), priority);
+            location = stringToLocation(args[1]);
         } else {
             if (offlinePlayer == null || !offlinePlayer.isOnline()) {
                 return "";
             }
-            region = getRegion(((Player) offlinePlayer).getLocation(), priority);
+            location = ((Player) offlinePlayer).getLocation();
         }
+
+        region = getRegion(location, priority);
 
         if (region == null) {
             return "";
