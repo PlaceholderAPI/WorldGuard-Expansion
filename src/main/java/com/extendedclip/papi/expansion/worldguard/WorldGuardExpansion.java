@@ -260,10 +260,10 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * Get the comma seperated names of all players in a domain.
+     * Get the comma separated names of all players in a domain.
      *
      * @param domain the domain to get players from
-     * @return comma seperated list of all players' names
+     * @return comma separated list of all players' names
      */
 
     private String getNamesFromDomain(DefaultDomain domain) {
@@ -276,10 +276,10 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * Get the comma seperated list of groups from doamin
+     * Get the comma separated list of groups from domain
      *
      * @param domain the domain to get groups from
-     * @return comma seperated list of all groups' names
+     * @return comma separated list of all groups' names
      */
 
     private String getGroupsFromDomain(DefaultDomain domain) {
