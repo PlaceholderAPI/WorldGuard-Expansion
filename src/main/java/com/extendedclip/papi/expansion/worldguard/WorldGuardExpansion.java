@@ -157,26 +157,16 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             case "region_name_capitalized":
                 return Character.isLetter(region.getId().charAt(0)) ? StringUtils.capitalize(region.getId()) : region.getId();
             case "region_owner": {
-                // Create a set of owners
-                Set<String> owners = new HashSet<>();
-                // Add them to set
-                region.getOwners().getPlayers().forEach(u -> owners.add(Bukkit.getOfflinePlayer(u).getName()));
-                // Return list of them
-                return owners.isEmpty() ? "" : String.join(", ", owners);
+                return getNamesFromDomain(region.getOwners());
             }
             case "region_owner_groups":
                 // Turn the owner groups to a string
-                return toGroupString(region.getOwners().getGroups());
+                return getGroupsFromDomain(region.getOwners());
             case "region_members":
-                // Create set for members
-                Set<String> members = new HashSet<>();
-                // Add all members to the region
-                region.getMembers().getPlayers().forEach(u -> members.add(Bukkit.getOfflinePlayer(u).getName()));
-                // Return list
-                return members.isEmpty() ? "" : String.join(", ", members);
+                return getNamesFromDomain(region.getMembers());
             case "region_members_groups":
                 // Turn member groups to a string
-                return toGroupString(region.getMembers().getGroups());
+                return getGroupsFromDomain(region.getMembers());
             case "region_flags":
                 Map<String, Object> flags = new HashMap<>();
                 region.getFlags().forEach((key, value) -> flags.put(key.getName(), value));
@@ -230,6 +220,43 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         }
         return null;
     }
+
+    /**
+     * Get the comma seperated names of all players in a domain.
+     *
+     * @param domain the domain to get players from
+     * @return comma seperated list of all players' names
+     */
+
+    private String getNamesFromDomain(DefaultDomain domain) {
+        Set<String> playerNames = new HashSet<>();
+        Set<UUID> playerUUIDs = domain.getPlayerDomain().getUniqueIds();
+        for (UUID uuid : playerUUIDs) {
+            playerNames.add(Bukkit.getOfflinePlayer(uuid).getName());
+        }
+        return playerNames.isEmpty() ? "" : String.join(", ", playerNames);
+    }
+
+    /**
+     * Get the comma seperated list of groups from doamin
+     *
+     * @param domain the domain to get groups from
+     * @return comma seperated list of all groups' names
+     */
+
+    private String getGroupsFromDomain(DefaultDomain domain) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterator<String> groupsIterator = domain.getGroups().iterator();
+
+        while (groupsIterator.hasNext()) {
+            stringBuilder.append("*");
+            stringBuilder.append(groupsIterator.next());
+            if (groupsIterator.hasNext()) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     /**
@@ -253,26 +280,5 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         } catch (Exception ex) {
             return null;
         }
-    }
-
-    /**
-     * Get a list of groups
-     *
-     * @param groups groups
-     * @return list
-     */
-    private String toGroupString(Set<String> groups) {
-        StringBuilder sb = new StringBuilder();
-
-        Iterator<String> it = groups.iterator();
-
-        while (it.hasNext()) {
-            sb.append("*");
-            sb.append((String) it.next());
-            if (it.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        return sb.toString();
     }
 }
