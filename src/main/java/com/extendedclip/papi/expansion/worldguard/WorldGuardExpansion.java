@@ -253,8 +253,16 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             return removedRegion;
         }
 
-        //If the first region exists, return it, otherwise, return null.
-        return firstRegion.orElse(null);
+        ProtectedRegion highestRegion = null;
+        for (ProtectedRegion region : selectedRegions) {
+            //Set highestRegion to highest priority region
+            if (highestRegion == null || region.getPriority() > highestRegion.getPriority()) {
+                highestRegion = region;
+            }
+        }
+
+        //Return highest priority region.
+        return highestRegion;
     }
 
     /**
