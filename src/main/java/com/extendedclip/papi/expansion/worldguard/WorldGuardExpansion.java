@@ -203,9 +203,10 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     /**
-     * Get a wrapped region from a location
+     * Get a region from a location
      *
      * @param location the location to check
+     * @param priority the priority wanted
      * @return the region
      */
     private ProtectedRegion getRegion(Location location, int priority) {
@@ -240,19 +241,21 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         ProtectedRegion removedRegion = null;
         for (ProtectedRegion region : selectedRegions) {
             if (region.getParent() != null) {
-                //Region has a parent, store it and remove it
+                //Region has a parent, back it up and remove it
                 removedRegion = region;
                 selectedRegions.remove(region);
             }
         }
 
+        //Get first region in selected regions
         Optional<ProtectedRegion> firstRegion = selectedRegions.stream().findFirst();
         if (!firstRegion.isPresent() && removedRegion != null) {
             //There is no region selected yet we removed a region from selection. Therefore, we will just return the region we removed.
-            //This edge case occurs when there are no regions matching the priority and all regions have a parent (somehow lol)
+            //This edge case occurs when there are no regions matching the priority and all regions have a parent.
             return removedRegion;
         }
 
+        //At this point, we know that we want to get our highest priority region.
         ProtectedRegion highestRegion = null;
         for (ProtectedRegion region : selectedRegions) {
             //Set highestRegion to highest priority region
