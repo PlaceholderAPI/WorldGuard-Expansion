@@ -146,8 +146,12 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                 return null;
             }
 
-            return region.getFlags().keySet().stream().anyMatch(f ->
-                    f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+            for (Flag<?> flag : region.getFlags().keySet()) {
+                if (flag.getName().equalsIgnoreCase(rg[1])) {
+                    return PlaceholderAPIPlugin.booleanTrue();
+                }
+            }
+            return PlaceholderAPIPlugin.booleanFalse();
         }
 
         // Defined as a switch statement to keep things clean
