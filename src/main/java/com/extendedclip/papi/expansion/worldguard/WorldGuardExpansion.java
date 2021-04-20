@@ -111,7 +111,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         ProtectedRegion region;
         int priority = 0;
 
-        // Check if it contains region priority
+        //Set priority to the one supplied by the placeholder string, if one exists.
         if (params.matches("(.*_)([1-9]\\d*)(.*)")) {
             priority = Integer.parseInt(params.replaceAll("(.*_)([1-9]\\d*)(.*)", "$2"));
             params = params.replace("_" + priority, "");
@@ -119,23 +119,16 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         // Check if it contains this symbol
         if (params.contains(":")) {
-            // Split by symbol
             String[] args = params.split(":");
-            // Set placeholder to first args
             params = args[0];
-            // Set region to second args
             region = getRegion(stringToLocation(args[1]), priority);
         } else {
-            // Check to make sure offline player is online
             if (offlinePlayer == null || !offlinePlayer.isOnline()) {
-                // If not, return empty
                 return "";
             }
-            // Return the region
             region = getRegion(((Player) offlinePlayer).getLocation(), priority);
         }
 
-        // Make sure it's not null
         if (region == null) {
             return "";
         }
@@ -148,7 +141,6 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
                     f.getName().equalsIgnoreCase(rg[1])) ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
         }
 
-        // Defined as a switch statement to keep thinks clean
         switch (params) {
             // Check the name of the region the player is in
             case "region_name":
