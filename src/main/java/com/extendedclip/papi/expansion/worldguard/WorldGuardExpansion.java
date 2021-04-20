@@ -258,7 +258,8 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      */
     private String toGroupString(Set<String> groups) {
         StringBuilder sb = new StringBuilder();
-        Iterator it = groups.iterator();
+
+        Iterator<String> it = groups.iterator();
 
         while (it.hasNext()) {
             sb.append("*");
