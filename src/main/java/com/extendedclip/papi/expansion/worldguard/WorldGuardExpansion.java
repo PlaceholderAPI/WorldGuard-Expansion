@@ -215,16 +215,48 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             return null;
         }
 
+        //Query regions
         RegionContainer container = worldguard.getPlatform().getRegionContainer();
         RegionQuery query = container.createQuery();
         ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(BukkitAdapter.adapt(location));
 
-        for(ProtectedRegion region : applicableRegionSet.getRegions()) {
+        //Get regions from out query
+        Set<ProtectedRegion> regions = applicableRegionSet.getRegions();
+
+        Set<ProtectedRegion> selectedRegions = new HashSet<>();
+
+        for(ProtectedRegion region : regions) {
             if (region.getPriority() == priority) {
-                return region;
+                //Region is equal to chosen priority and we will select it.
+                selectedRegions.add(region);
             }
         }
-        return null;
+        if (selectedRegions.isEmpty()) {
+            //Priority search came up empty, select all regions in the area.
+            selectedRegions.addAll(regions);
+        } else if (selectedRegions.size() == 1) {
+            //There was only one region in our priority search, that's the one we want so we'll return it :)
+            return selectedRegions.stream().findFirst().get();
+        }
+
+        ProtectedRegion removedRegion = null;
+        for (ProtectedRegion region : selectedRegions) {
+            if (region.getParent() != null) {
+                //Region has a parent, store it and remove it
+                removedRegion = region;
+                selectedRegions.remove(region);
+            }
+        }
+
+        Optional<ProtectedRegion> firstRegion = selectedRegions.stream().findFirst();
+        if (!firstRegion.isPresent() && removedRegion != null) {
+            //There is no region selected yet we removed a region from selection. Therefore, we will just return the region we removed.
+            //This edge case occurs when there are no regions matching the priority and all regions have a parent (somehow lol)
+            return removedRegion;
+        }
+
+        //If the first region exists, return it, otherwise, return null.
+        return firstRegion.orElse(null);
     }
 
     /**
