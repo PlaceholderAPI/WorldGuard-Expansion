@@ -20,6 +20,16 @@
  */
 package com.extendedclip.papi.expansion.worldguard;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.apache.commons.lang.StringUtils;
@@ -27,9 +37,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.codemc.worldguardwrapper.WorldGuardWrapper;
-import org.codemc.worldguardwrapper.region.IWrappedRegion;
-import org.codemc.worldguardwrapper.selection.ICuboidSelection;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -41,7 +48,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     private final String IDENTIFIER = NAME.toLowerCase();
     private final String VERSION = getClass().getPackage().getImplementationVersion();
 
-    private WorldGuardWrapper worldguard;
+    private WorldGuard worldguard;
 
     /**
      * Since this expansion requires api access to the plugin "SomePlugin"
@@ -52,7 +59,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     @Override
     public boolean canRegister() {
         if (Bukkit.getServer().getPluginManager().getPlugin(NAME) == null) return false;
-        worldguard = WorldGuardWrapper.getInstance();
+        worldguard = WorldGuard.getInstance();
         return worldguard != null;
     }
 
@@ -100,10 +107,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     @Override
     public String onRequest(OfflinePlayer offlinePlayer, String params) {
 
-        // Get the wrapper from input location
-        IWrappedRegion region;
-        ICuboidSelection selection;
-        int priority = 1;
+        // Initialise region & create a default priority.
+        ProtectedRegion region;
+        int priority = 0;
 
         // Check if it contains region priority
         if (params.matches("(.*_)([1-9]\\d*)(.*)")) {
@@ -180,25 +186,22 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         }
 
         if (params.startsWith("region_min_point_") || params.startsWith("region_max_point_")) {
-            try {
-                selection = (ICuboidSelection) region.getSelection();
-            } catch (ClassCastException e) {
-                return "";
-            }
+            BlockVector3 minimumPoint = region.getMinimumPoint();
+            BlockVector3 maximumPoint = region.getMaximumPoint();
 
             switch (params) {
                 case "region_min_point_x":
-                    return String.valueOf(selection.getMinimumPoint().getBlockX());
+                    return String.valueOf(minimumPoint.getBlockX());
                 case "region_min_point_y":
-                    return String.valueOf(selection.getMinimumPoint().getBlockY());
+                    return String.valueOf(minimumPoint.getBlockY());
                 case "region_min_point_z":
-                    return String.valueOf(selection.getMinimumPoint().getBlockZ());
+                    return String.valueOf(minimumPoint.getBlockZ());
                 case "region_max_point_x":
-                    return String.valueOf(selection.getMaximumPoint().getBlockX());
+                    return String.valueOf(maximumPoint.getBlockX());
                 case "region_max_point_y":
-                    return String.valueOf(selection.getMaximumPoint().getBlockY());
+                    return String.valueOf(maximumPoint.getBlockY());
                 case "region_max_point_z":
-                    return String.valueOf(selection.getMaximumPoint().getBlockZ());
+                    return String.valueOf(maximumPoint.getBlockZ());
             }
         }
 
@@ -209,22 +212,24 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      * Get a wrapped region from a location
      *
      * @param location the location to check
-     * @return the wrapped region
+     * @return the region
      */
-    private IWrappedRegion getRegion(Location location, int priority) {
+    private ProtectedRegion getRegion(Location location, int priority) {
         if (location == null) {
             return null;
         }
-        try {
-            Map<String, Integer> regions = worldguard.getRegions(location).stream().sorted(
-                    Comparator.comparingInt(IWrappedRegion::getPriority).reversed())
-                    .collect(toMap(IWrappedRegion::getId, IWrappedRegion::getPriority, (v1, v2) -> v2, LinkedHashMap::new));
 
-            Optional<IWrappedRegion> region = worldguard.getRegion(location.getWorld(), regions.keySet().toArray(new String[0])[priority - 1]);
-            return region.orElse(null);
-        } catch (IndexOutOfBoundsException ex) {
-            return null;
+        RegionContainer container = worldguard.getPlatform().getRegionContainer();
+        RegionQuery query = container.createQuery();
+        ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(BukkitAdapter.adapt(location));
+
+        for(ProtectedRegion region : applicableRegionSet.getRegions()) {
+            if (region.getPriority() == priority) {
+                return region;
+            }
         }
+        return null;
+    }
     }
 
     /**
