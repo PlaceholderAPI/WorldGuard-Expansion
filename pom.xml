@@ -8,6 +8,10 @@
   <name>WorldGuard-Expansion</name>
   <description>PlaceholderAPI expansion for WorldGuard placeholders</description>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <repositories>
     <repository>
       <id>spigot-repo</id>
