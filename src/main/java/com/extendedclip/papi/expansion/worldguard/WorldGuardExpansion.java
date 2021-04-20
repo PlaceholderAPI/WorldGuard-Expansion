@@ -30,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import org.codemc.worldguardwrapper.selection.ICuboidSelection;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import static java.util.stream.Collectors.toMap;
@@ -56,7 +57,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return NAME;
     }
 
@@ -66,7 +67,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      * @return The name of the author as a String.
      */
     @Override
-    public String getAuthor() {
+    public @NotNull String getAuthor() {
         return "clip";
     }
 
@@ -77,7 +78,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      * @return The version as a String.
      */
     @Override
-    public String getVersion() {
+    public @NotNull String getVersion() {
         return VERSION;
     }
 
@@ -91,7 +92,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
      * @return The identifier in {@code %<identifier>_<value>%} as String.
      */
     @Override
-    public String getIdentifier() {
+    public @NotNull String getIdentifier() {
         return IDENTIFIER;
     }
 
