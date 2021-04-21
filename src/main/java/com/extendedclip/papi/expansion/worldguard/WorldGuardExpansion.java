@@ -240,11 +240,11 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         //We have not been given a priority or the priority search came up w/ more or less than 1, select all regions.
         selectedRegions.addAll(regions);
 
-        //We have selected more than one region, now we want to eliminate all children.
+        //We have selected more than one region, now we want to eliminate the parent.
         ProtectedRegion removedRegion = null;
         for (ProtectedRegion region : selectedRegions) {
-            if (region.getParent() != null) {
-                //Region has a parent, back it up and remove it
+            if (region.getParent() == null) {
+                //Current region is a parent, back it up and remove it.
                 removedRegion = region;
                 selectedRegions.remove(region);
             }
@@ -254,15 +254,15 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         Optional<ProtectedRegion> firstRegion = selectedRegions.stream().findFirst();
         if (!firstRegion.isPresent() && removedRegion != null) {
             //There is no region selected yet we removed a region from selection. Therefore, we will just return the region we removed.
-            //This edge case occurs when there are no regions matching the priority and all regions have a parent.
+            //This occurs when there are no child regions.
             return removedRegion;
         }
 
-        //At this point, we know that we want to get our highest priority region.
+        //At this point, we know that we want to return our children.
         ProtectedRegion highestRegion = null;
         for (ProtectedRegion region : selectedRegions) {
             //Set highestRegion to highest priority region
-            if (highestRegion == null || region.getPriority() > highestRegion.getPriority()) {
+            if (highestRegion == null || region.getPriority() >= highestRegion.getPriority()) {
                 highestRegion = region;
             }
         }
