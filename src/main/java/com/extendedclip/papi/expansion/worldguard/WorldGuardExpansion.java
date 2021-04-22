@@ -225,6 +225,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         //Get regions from our query
         Set<ProtectedRegion> regions = applicableRegionSet.getRegions();
 
+
         Set<ProtectedRegion> selectedRegions = new HashSet<>();
         if (priority != null) {
             //We have been given a priority, now we want to select all regions with that priority.
@@ -240,38 +241,54 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             }
         }
 
-        //We have not been given a priority or the priority search came up w/ more or less than 1, select all regions.
-        selectedRegions.addAll(regions);
+        if (selectedRegions.size() == 0) {
+            selectedRegions.addAll(regions);
+        }
 
         //We have selected more than one region, now we want to eliminate the parent.
-        ProtectedRegion removedRegion = null;
+        List<ProtectedRegion> parents = new ArrayList<>();
         for (ProtectedRegion region : new ArrayList<>(selectedRegions)) {
             if (region.getParent() == null) {
                 //Current region is a parent, back it up and remove it.
-                removedRegion = region;
+                parents.add(region);
                 selectedRegions.remove(region);
             }
         }
-
-        //Get first region in selected regions
-        Optional<ProtectedRegion> firstRegion = selectedRegions.stream().findFirst();
-        if (!firstRegion.isPresent() && removedRegion != null) {
-            //There is no region selected yet we removed a region from selection. Therefore, we will just return the region we removed.
-            //This occurs when there are no child regions.
-            return removedRegion;
+        if (selectedRegions.size() == 0) {
+            //No children in location, select parents again
+            selectedRegions.addAll(parents);
         }
 
-        //At this point, we know that we want to return our children.
-        ProtectedRegion highestRegion = null;
+        if (selectedRegions.size() == 1) {
+            //Only 1 region exists, return it
+            return selectedRegions.stream().findFirst().get();
+        }
+
+        //At this point, we now want to sort through our selected regions for the highest prio one.
+        List<ProtectedRegion> highestRegions = new ArrayList<>();
         for (ProtectedRegion region : selectedRegions) {
             //Set highestRegion to highest priority region
-            if (highestRegion == null || region.getPriority() >= highestRegion.getPriority()) {
-                highestRegion = region;
+            if (highestRegions.size() == 0) {
+                highestRegions.add(region);
+                continue;
+            }
+            if (highestRegions.get(0).getPriority() == region.getPriority()) {
+                highestRegions.add(region);
+            } else if (highestRegions.get(0).getPriority() < region.getPriority()) {
+                highestRegions.clear();
+                highestRegions.add(region);
             }
         }
 
-        //Return highest priority region.
-        return highestRegion;
+        if (highestRegions.size() == 1) {
+            return highestRegions.get(0);
+        } else if (highestRegions.size() > 1) {
+            Random rand = new Random();
+            return highestRegions.get(rand.nextInt(highestRegions.size()));
+        } else {
+            System.out.println("o no");
+            return null;
+        }
     }
 
     /**
