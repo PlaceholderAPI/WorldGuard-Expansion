@@ -286,7 +286,6 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
             Random rand = new Random();
             return highestRegions.get(rand.nextInt(highestRegions.size()));
         } else {
-            System.out.println("o no");
             return null;
         }
     }
