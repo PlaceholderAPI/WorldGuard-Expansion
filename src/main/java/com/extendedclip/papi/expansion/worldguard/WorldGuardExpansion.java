@@ -222,7 +222,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         RegionQuery query = container.createQuery();
         ApplicableRegionSet applicableRegionSet = query.getApplicableRegions(BukkitAdapter.adapt(location));
 
-        //Get regions from out query
+        //Get regions from our query
         Set<ProtectedRegion> regions = applicableRegionSet.getRegions();
 
         Set<ProtectedRegion> selectedRegions = new HashSet<>();
