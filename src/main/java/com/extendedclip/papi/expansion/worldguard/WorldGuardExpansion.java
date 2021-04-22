@@ -76,6 +76,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         return "clip";
     }
 
+    @Override
+    public @NotNull String getRequiredPlugin() { return "WorldGuard"; }
+
     /**
      * This is the version of this expansion.
      * <br>You don't have to use numbers, since it is set as a String.
@@ -242,7 +245,7 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
 
         //We have selected more than one region, now we want to eliminate the parent.
         ProtectedRegion removedRegion = null;
-        for (ProtectedRegion region : selectedRegions) {
+        for (ProtectedRegion region : new ArrayList<>(selectedRegions)) {
             if (region.getParent() == null) {
                 //Current region is a parent, back it up and remove it.
                 removedRegion = region;
