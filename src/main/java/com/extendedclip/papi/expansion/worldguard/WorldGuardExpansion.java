@@ -225,6 +225,9 @@ public class WorldGuardExpansion extends PlaceholderExpansion {
         //Get regions from our query
         Set<ProtectedRegion> regions = applicableRegionSet.getRegions();
 
+        if (regions.size() == 0) {
+            return null;
+        }
 
         Set<ProtectedRegion> selectedRegions = new HashSet<>();
         if (priority != null) {
