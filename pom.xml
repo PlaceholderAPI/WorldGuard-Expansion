@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.extendedclip.papi.expansion.worldguard</groupId>
   <artifactId>worldguard-expansion</artifactId>
-  <version>1.5.3</version>
+  <version>1.5.4</version>
   <name>WorldGuard-Expansion</name>
   <description>PlaceholderAPI expansion for WorldGuard placeholders</description>
 
